@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>View Order</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans flex items-center justify-center min-h-screen">
+
+  <div class="bg-white p-8 rounded-xl shadow-md text-center max-w-md w-full">
+    <h1 class="text-3xl font-bold text-gray-800 mb-4">Your Order Details</h1>
+
+    <div id="orderSummary" class="text-left mt-6 text-sm text-gray-700">
+      <!-- Order summary will be populated here -->
+    </div>
+
+    <div class="mt-6">
+      <a href="menu.html" class="text-blue-600 hover:text-blue-800">Back to Menu Page</a>
+    </div>
+  </div>
+
+  <script>
+    // Fetch and display order details from localStorage
+    window.onload = function() {
+      const order = JSON.parse(localStorage.getItem("finalOrder"));
+      if (!order) {
+        document.getElementById("orderSummary").innerHTML = `<p>No order found. Please try again.</p>`;
+        return;
+      }
+
+      const summaryDiv = document.getElementById("orderSummary");
+
+      // Extract table info correctly
+      const tableNum = order.table?.number || "N/A";
+      const tableSeats = order.table?.seats || "N/A";
+
+      let html = `
+        <h2 class="text-xl font-semibold mb-2">Order Summary</h2>
+        <p><strong>Customer:</strong> ${order.customer}</p>
+        <p><strong>Table #${tableNum}</strong> (${tableSeats} seats)</p>
+        <p><strong>Guests:</strong> ${order.guestCount}</p>
+        <hr class="my-2"/>
+        <p class="font-semibold">Items Ordered:</p>
+        <ul class="list-disc list-inside">
+      `;
+
+      // Loop through items if any
+      if (order.items && order.items.length > 0) {
+        order.items.forEach(item => {
+          html += `<li>${item.name} x ${item.quantity} — $${(item.price * item.quantity).toFixed(2)}</li>`;
+        });
+      } else {
+        html += `<li>No items pre-ordered.</li>`;
+      }
+
+      html += `</ul><hr class="my-2"/>
+        <p class="font-semibold text-lg">Total: $${order.total.toFixed(2)}</p>`;
+
+      summaryDiv.innerHTML = html;
+    }
+  </script>
+</body>
+</html>

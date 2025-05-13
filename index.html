@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Restaurant Reservation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+  <!-- Header -->
+  <header class="text-center py-6 bg-gray-800 text-white shadow-md">
+    <img src="logo.png" alt="Restaurant Logo" class="mx-auto w-16 h-16 mb-2" />
+    <h1 class="text-3xl font-bold">Delicious Bites</h1>
+  </header>
+
+  <!-- Image Slider -->
+  <section class="w-full max-w-3xl mx-auto mt-8">
+    <div class="relative w-full overflow-hidden rounded-lg shadow-lg">
+      <div class="flex transition-transform duration-700 ease-in-out" id="slider">
+        <img src="https://www.aperitif.com/wp-content/uploads/2024/01/top-view-dining-tables-without-food-scaled.jpg" class="w-full" />
+        <img src="https://mybayutcdn.bayut.com/mybayut/wp-content/uploads/cover-9-fine-dining.jpg" class="w-full" />
+        <img src="https://www.aperitif.com/wp-content/uploads/2024/01/top-view-dining-tables-without-food-scaled.jpg" class="w-full" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Form Section -->
+  <section class="w-full max-w-md mx-auto mt-10 px-4">
+    <form id="startForm" class="flex flex-col gap-4">
+      <input type="text" id="customerName" placeholder="Customer Name" required class="p-3 border rounded-lg shadow-sm" />
+      <input type="tel" id="phoneNumber" placeholder="Phone Number" required class="p-3 border rounded-lg shadow-sm" />
+      <button type="submit" class="bg-gray-800 text-white py-3 rounded-lg hover:bg-gray-700 transition">
+        Start Ordering
+      </button>
+    </form>
+  </section>
+
+  <!-- Script for slider + localStorage -->
+  <script>
+    // Image Slider (auto slide)
+    let index = 0;
+    const slider = document.getElementById('slider');
+    setInterval(() => {
+      index = (index + 1) % 3;
+      slider.style.transform = `translateX(-${index * 100}%)`;
+    }, 3000);
+
+    // Save customer data and navigate
+    document.getElementById('startForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('customerName').value;
+      const phone = document.getElementById('phoneNumber').value;
+
+      localStorage.setItem('customerName', name);
+      localStorage.setItem('phoneNumber', phone);
+
+      window.location.href = 'table.html';
+    });
+  </script>
+
+</body>
+</html>

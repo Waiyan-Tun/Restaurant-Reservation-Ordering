@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Table Reservation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+  <!-- Header -->
+  <header class="text-center py-6 bg-gray-800 text-white shadow-md">
+    <h1 class="text-2xl font-bold">Select Your Table</h1>
+  </header>
+
+  <!-- Table Grid -->
+  <section class="max-w-4xl mx-auto mt-8 px-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" id="tableList">
+    <!-- Tables will be rendered here -->
+  </section>
+
+  <!-- Guest input -->
+  <section class="max-w-md mx-auto mt-8 px-4">
+    <input type="number" id="guestCount" placeholder="Number of Guests" class="w-full p-3 border rounded-lg shadow-sm" required />
+  </section>
+
+  <!-- Buttons -->
+  <section class="max-w-md mx-auto mt-6 px-4 flex justify-between gap-4">
+    <button id="reserveBtn" class="w-1/2 bg-green-600 text-white py-3 rounded-lg hover:bg-green-500 transition">
+      Reserve Table
+    </button>
+    <button id="preorderBtn" class="w-1/2 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-500 transition">
+      Pre-order Food
+    </button>
+  </section>
+
+  <!-- Reservation Slip -->
+  <section class="max-w-md mx-auto mt-6 px-4 hidden" id="reservationSlip">
+    <div class="p-4 bg-white shadow-md rounded-lg">
+      <h2 class="text-lg font-bold mb-2">Reservation Slip</h2>
+      <p><strong>Name:</strong> <span id="slipName"></span></p>
+      <p><strong>Table #:</strong> <span id="slipTable"></span></p>
+      <p><strong>Guests:</strong> <span id="slipGuests"></span></p>
+    </div>
+  </section>
+
+  <!-- Script -->
+  <script>
+    const tableData = [
+      { number: 1, seats: 2, status: "free" },
+      { number: 2, seats: 4, status: "reserved" },
+      { number: 3, seats: 6, status: "free" },
+      { number: 4, seats: 2, status: "free" },
+      { number: 5, seats: 4, status: "reserved" },
+      { number: 6, seats: 6, status: "free" }
+    ];
+
+    const tableList = document.getElementById("tableList");
+    let selectedTable = null;
+
+    // Render tables
+    tableData.forEach(table => {
+      const div = document.createElement("div");
+      div.className = `p-4 rounded-lg shadow-md cursor-pointer text-center border
+        ${table.status === 'free' ? 'bg-white hover:bg-gray-200' : 'bg-gray-300 cursor-not-allowed'}`;
+      div.innerHTML = `
+        <h2 class="text-xl font-bold">Table ${table.number}</h2>
+        <p>${table.seats} Seats</p>
+        <p>Status: <span class="font-semibold">${table.status}</span></p>
+      `;
+
+      if (table.status === 'free') {
+        div.addEventListener('click', () => {
+          document.querySelectorAll('#tableList > div').forEach(el => el.classList.remove('ring', 'ring-blue-500'));
+          div.classList.add('ring', 'ring-blue-500');
+          selectedTable = table;
+        });
+      }
+
+      tableList.appendChild(div);
+    });
+
+    // Create reservation object and save to localStorage
+    function saveReservationToLocal(guestCount) {
+      const name = localStorage.getItem("customerName") || "Anonymous";
+
+      const reservation = {
+        customer: name,
+        guestCount: Number(guestCount),
+        table: {
+          number: selectedTable.number,
+          seats: selectedTable.seats
+        },
+        items: [],
+        total: 0
+      };
+
+      localStorage.setItem("reservedTable", JSON.stringify(selectedTable));
+      localStorage.setItem("guestCount", guestCount);
+      localStorage.setItem("finalOrder", JSON.stringify(reservation));
+    }
+
+    // Reserve button logic
+    document.getElementById("reserveBtn").addEventListener("click", () => {
+      const guestCount = document.getElementById("guestCount").value;
+      const name = localStorage.getItem("customerName");
+
+      if (!selectedTable || !guestCount) {
+        alert("Please select a table and enter guest count.");
+        return;
+      }
+
+      saveReservationToLocal(guestCount);
+
+      // Show reservation slip
+      document.getElementById("slipName").textContent = name;
+      document.getElementById("slipTable").textContent = selectedTable.number;
+      document.getElementById("slipGuests").textContent = guestCount;
+      document.getElementById("reservationSlip").classList.remove("hidden");
+    });
+
+    // Pre-order button
+    document.getElementById("preorderBtn").addEventListener("click", () => {
+      const guestCount = document.getElementById("guestCount").value;
+
+      if (!selectedTable || !guestCount) {
+        alert("Please select a table and enter guest count.");
+        return;
+      }
+
+      saveReservationToLocal(guestCount);
+
+      window.location.href = "menu.html";
+    });
+  </script>
+</body>
+</html>

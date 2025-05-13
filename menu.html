@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Menu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    #cartIcon {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+    }
+    .category-btn.selected {
+      background-color: #6b7280; /* Example: Gray-500 from Tailwind */
+      color: white;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+  <header class="text-center py-6 bg-gray-800 text-white shadow-md">
+    <h1 class="text-2xl font-bold">Delicious Bites Menu</h1>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 mt-6 flex flex-col md:flex-row gap-6">
+
+    <aside class="md:w-1/4">
+      <h2 class="text-xl font-semibold mb-2">Categories</h2>
+      <ul class="space-y-2">
+        <li><button class="category-btn w-full text-left px-4 py-2 bg-white shadow rounded selected" data-category="All">All</button></li>
+        <li><button class="category-btn w-full text-left px-4 py-2 bg-white shadow rounded" data-category="Main">Main</button></li>
+        <li><button class="category-btn w-full text-left px-4 py-2 bg-white shadow rounded" data-category="Combo">Combo</button></li>
+        <li><button class="category-btn w-full text-left px-4 py-2 bg-white shadow rounded" data-category="Special">Special Offer</button></li>
+        <li><button class="category-btn w-full text-left px-4 py-2 bg-white shadow rounded" data-category="Desserts">Desserts</button></li>
+        <li><button class="category-btn w-full text-left px-4 py-2 bg-white shadow rounded" data-category="Drinks">Drinks</button></li>
+      </ul>
+    </aside>
+
+    <section class="md:w-3/4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="menuItems">
+      </section>
+
+  </main>
+
+  <button id="cartIcon" class="bg-gray-800 text-white p-3 rounded-full shadow-lg fixed z-10">
+    🛒 <span id="cartCount">0</span>
+  </button>
+
+  <script>
+  const menu = [
+    { id: 1, name: "Grilled Chicken", price: 12, category: "Main", image: "https://kristineskitchenblog.com/wp-content/uploads/2023/05/grilled-chicken-recipe-25.jpg", desc: "Juicy grilled chicken." },
+    { id: 2, name: "Combo Meal", price: 18, category: "Combo", image: "https://media.istockphoto.com/id/520134277/photo/take-out-food-classic-cheeseburger-meal-isolated-on-white.jpg?s=612x612&w=0&k=20&c=-e-sj-hieOBQclUBRu8E7wRfIxqe4mB_CKnkJwyr-es=", desc: "Burger + Fries + Drink." },
+    { id: 3, name: "Chocolate Cake", price: 6, category: "Desserts", image: "https://ichef.bbci.co.uk/food/ic/food_16x9_1600/recipes/easy_chocolate_cake_31070_16x9.jpg", desc: "Delicious dessert." },
+    { id: 4, name: "Coke", price: 3, category: "Drinks", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRx-ei3pfWaQUbJu0iqj7EgqbdQ9dLk0jTVw&s", desc: "Cold refreshing drink." },
+    { id: 5, name: "Steak Special", price: 20, category: "Special", image: "https://www.halswellbutchery.co.nz/cdn/shop/articles/shutterstock_2105932298_1_1600x.jpg?v=1725243099", desc: "Limited-time offer!" },
+    { id: 6, name: "Veggie Pasta", price: 10, category: "Main", image: "https://www.budgetbytes.com/wp-content/uploads/2021/07/Quick-Veggie-Pasta-fork.jpg", desc: "Healthy and tasty." }
+  ];
+
+  const menuContainer = document.getElementById("menuItems");
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  let selectedCategoryButton = document.querySelector('.category-btn[data-category="All"]');
+
+  function updateCartCount() {
+    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+    document.getElementById("cartCount").textContent = count;
+  }
+
+  function renderMenu(category = "All") {
+    menuContainer.innerHTML = "";
+    const filtered = category === "All" ? menu : menu.filter(item => item.category === category);
+
+    filtered.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "bg-white p-4 rounded shadow";
+      div.innerHTML = `
+        <img src="${item.image}" alt="${item.name}" class="w-full h-32 object-cover rounded mb-2"/>
+        <h3 class="text-lg font-semibold">${item.name}</h3>
+        <p class="text-sm text-gray-500 mb-2">${item.desc}</p>
+        <p class="text-gray-700 font-bold mb-2">$${item.price}</p>
+        <div class="flex items-center mb-2">
+          <button class="decrease px-2 py-1 bg-gray-300 rounded text-sm">-</button>
+          <input type="number" value="1" min="1" class="w-12 text-center mx-2 border rounded quantity"/>
+          <button class="increase px-2 py-1 bg-gray-300 rounded text-sm">+</button>
+        </div>
+        <button class="addToCart w-full bg-gray-800 text-white py-2 rounded mt-1">Add</button>
+      `;
+
+      const qtyInput = div.querySelector(".quantity");
+      div.querySelector(".increase").addEventListener("click", () => qtyInput.value = parseInt(qtyInput.value) + 1);
+      div.querySelector(".decrease").addEventListener("click", () => {
+        if (parseInt(qtyInput.value) > 1) qtyInput.value = parseInt(qtyInput.value) - 1;
+      });
+
+      div.querySelector(".addToCart").addEventListener("click", () => {
+        const quantity = parseInt(qtyInput.value);
+        const existing = cart.find(c => c.id === item.id);
+        if (existing) {
+          existing.quantity += quantity;
+        } else {
+          cart.push({ ...item, quantity });
+        }
+        localStorage.setItem("cart", JSON.stringify(cart));
+        updateCartCount();
+      });
+
+      menuContainer.appendChild(div);
+    });
+  }
+
+  document.querySelectorAll(".category-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (selectedCategoryButton) {
+        selectedCategoryButton.classList.remove('selected');
+      }
+      btn.classList.add('selected');
+      selectedCategoryButton = btn;
+      renderMenu(btn.dataset.category);
+    });
+  });
+
+  document.getElementById("cartIcon").addEventListener("click", () => {
+    window.location.href = "cart.html";
+  });
+
+  // Init
+  renderMenu();
+  updateCartCount();
+</script>
+
+
+</body>
+</html>
